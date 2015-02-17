@@ -103,34 +103,6 @@ var Breakout = (function () {
             canvas.fill();
         };
 
-        Ball.prototype.setX = function (x) {
-            if (x < 0) {
-                this.vel_x = -this.vel_x;
-                this.pos_x = x;
-            }
-            else if (x + _radius > canvas_width) {
-                this.vel_x = -this.vel_x;
-                this.pos_x = x;
-            }
-            else {
-                this.pos_x = x;
-            }
-        };
-
-        Ball.prototype.setY = function (y) {
-            if (y < 0) {
-                this.vel_y = -this.vel_y;
-                this.pos_y = y;
-            }
-            else if (y + _radius - 5 > canvas_height) {
-
-                alert("You lose!")
-            }
-            else {
-                this.pos_y = y;
-            }
-        };
-
         var setRadius = function (r) {
             _radius = r;
         };
@@ -259,8 +231,6 @@ var Breakout = (function () {
             ball.angle = (360 - ball.angle) - (formula - extra_angle);
 
         }
-
-
         drawAll();
     };
 
