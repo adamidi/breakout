@@ -27,7 +27,7 @@
             x:start_x,
             y:start_y ,
             moving:0,
-            speed: 3,
+            speed: 4,
             draw: function(){
                 canvas.fillStyle="white";
                 canvas.strokeStyle = "black";
@@ -44,15 +44,17 @@
         var moduleBlock = (function(){
             var _height = 10;
             var _width = 30;
-            var Block = function(x,y){
+            var Block = function(x,y,color){
                 this.x = x;
                 this.y = y;
+                this.color= color;
                 this.width = _width;
                 this.height = _height;
+                this.display = true;
             };
 
-            Block.prototype.draw =function(color){
-                canvas.fillStyle=color;
+            Block.prototype.draw =function(){
+                canvas.fillStyle=this.color;
                 canvas.strokeStyle = "black";
                 canvas.fillRect(this.x,this.y,this.width, this.height);
                 canvas.strokeRect(this.x,this.y,this.width, this.height);
@@ -90,14 +92,14 @@
 
         var moduleBall = (function(){
             var _radius = 5;
-
-
             var Ball = function(x,y){
-                this.pos_x = x;
+                this.pos_x = x; //center coordinates
                 this.pos_y = y;
-                this.x = x -_radius;
+                this.x = x -_radius; // coordinates for collision detection
                 this.x = y-_radius;
                 this.width = this.height = 2*_radius;
+                this.vel_x=-5;
+                this.vel_y=-5;
             };
 
             Ball.prototype.draw = function(){
@@ -107,10 +109,30 @@
                 canvas.fill();
             };
 
-            Ball.prototype.newPosition = function(new_x,new_y,new_d){
-                this.pos_x=new_x;
-                this.pos_y=new_y;
-                this.direction = new_d;
+            Ball.prototype.setX = function(x){
+                if(x<0){
+                    this.vel_x = -this.vel_x;
+                    this.pos_x=x;
+                }
+                else if (x+_radius>canvas_width){
+                    this.vel_x = -this.vel_x;
+                    this.pos_x=x;
+                }
+                else{
+                    this.pos_x=x;}
+            };
+
+            Ball.prototype.setY = function(y){
+                if(y<0){
+                    this.vel_y = -this.vel_y;
+                    this.pos_y=y;
+                }
+                else if (y+_radius-5>canvas_height){
+
+                    alert("You lose!")
+                }
+                else{
+                    this.pos_y=y;}
             };
 
             var setRadius = function(r){
@@ -129,26 +151,34 @@
         })();
 
         var init = function(){
-            //background
-            canvas.fillStyle="lavender";
-            canvas.fillRect(0,0,canvas_width, canvas_height);
             //blocks
             var z=0;
             for(var i=0;i<canvas_width;i+=moduleBlock.getWidth()){
                 for (var j=0;j<canvas_height/2;j+=moduleBlock.getHeight()){
-                    blocklist[z]= new moduleBlock.Block(i,j);
-                    var color = colors[getRandomInt(1,11)];
-                    blocklist[z].draw(color);
+                    blocklist[z]= new moduleBlock.Block(i,j,colors[getRandomInt(0,10)]);
                     z++;
+                }
+            }
+            //ball
+            ball = new moduleBall.Ball(canvas_width/2,canvas_height-board.height-moduleBall.getRadius());
+            blocklist[0].display=false;
+            console.log(blocklist[1].color)
+        };
+
+        var drawAll =  function(){
+            //background
+            canvas.fillStyle="lavender";
+            canvas.fillRect(0,0,canvas_width, canvas_height);
+            //blocks
+            for(var z=0;z<blocklist.length;z++){
+                if(blocklist[z].display){
+                    blocklist[z].draw();
                 }
             }
             //board
             board.draw();
             //ball
-            ball = new moduleBall.Ball(canvas_width/2,canvas_height-board.height-moduleBall.getRadius());
             ball.draw();
-
-            console.log(board.x, board.y,board.width,board.height);
         };
 
         var getRandomInt = function (min, max) {
@@ -162,13 +192,16 @@
                     obj1.height + obj1.y > obj2.y) {
                 return true;
             }
+            else return false;
         };
 
         var update = function() {
             // update the position of the ball
+            ball.setX(ball.pos_x+ball.vel_x);
+            ball.setY(ball.pos_y+ball.vel_y);
+
             // update the position of the board
                 //listen for user input
-
             var onkey = function(ev){
                 var key = ev.keyCode;
                 if(key==37){ //left
@@ -178,20 +211,14 @@
                     board.moving = 2;
                 }
             };
-
             document.addEventListener('keydown', function(ev) { return onkey(ev);  });
             document.addEventListener('keyup',   function() { board.moving=0; });
-            
             switch (board.moving){
                 case 1: board.setX(board.x - board.speed); break;
                 case 2: board.setX(board.x + board.speed); break;
             }
 
-//
-//            canvas.fillStyle="lavender";
-//            canvas.fillRect(0,0,canvas_width, canvas_height);
-
-            board.draw();
+            drawAll();
 
 
 
